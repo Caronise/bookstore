@@ -6,20 +6,18 @@ import (
 )
 
 type Book struct {
-	Title  string
-	Author string
-	Copies int
-	Series bool
+	Title           string
+	Author          string
+	Copies          int
+	PriceCents      int
+	DiscountPercent int
+	Series          bool
 }
 
-func CreateAndPrintBook(w io.Writer, title, author string, copies int, series bool) Book {
-	b := Book{
-		Title:  "Death",
-		Author: "Richard Beliveau",
-		Copies: 5,
-		Series: false,
-	}
+func PrintBook(w io.Writer, book Book) {
+	fmt.Fprintf(w, "%+v\n", book)
+}
 
-	fmt.Fprintf(w, "%+v\n", b)
-	return b
+func NetPrice(priceCents, discountPercent int) int {
+	return (priceCents * (100 - discountPercent)) / 100
 }
