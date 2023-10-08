@@ -163,3 +163,8 @@ func (c Customer) MailingLabel() string {
 func (c Catalog) GetAllBooks() []Book {
 	return []Book(c)
 }
+
+// GetCatalogSize returns the size of the catalog.
+func (c Catalog) GetCatalogSize() int {
+	return len(c)
+}
