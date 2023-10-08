@@ -11,7 +11,7 @@ func TestPrintBook(t *testing.T) {
 	var sb strings.Builder
 	book := bookstore.Book{
 		Title:           "Death",
-		Author:          "Richard Beliveau",
+		Authors:         []string{"Richard Beliveau"},
 		Copies:          5,
 		PriceCents:      2999,
 		DiscountPercent: 10,
@@ -20,7 +20,7 @@ func TestPrintBook(t *testing.T) {
 
 	bookstore.PrintBook(&sb, book)
 
-	expectedOutput := "{Title:Death Author:Richard Beliveau Copies:5 PriceCents:2999 DiscountPercent:10 Series:false}\n"
+	expectedOutput := "{Title:Death Authors:[Richard Beliveau] Copies:5 PriceCents:2999 DiscountPercent:10 Series:false}\n"
 
 	if sb.String() != expectedOutput {
 		t.Errorf("Expected %q, but got %q", expectedOutput, sb.String())
@@ -32,7 +32,7 @@ func TestNetPrice(t *testing.T) {
 	var sb strings.Builder
 	book := bookstore.Book{
 		Title:           "Death",
-		Author:          "Richard Beliveau",
+		Authors:         []string{"Richard Beliveau"},
 		Copies:          5,
 		PriceCents:      2999,
 		DiscountPercent: 10,
@@ -59,18 +59,20 @@ func TestPrintMultipleBooks(t *testing.T) {
 	var sb strings.Builder
 
 	books := []bookstore.Book{
-		{Title: "Death", Author: "Richard Beliveau", Copies: 9, PriceCents: 2999, DiscountPercent: 10, Series: false},
-		{Title: "Lord of the rings", Author: "J.R.R Tolkien", Copies: 20, PriceCents: 1950, DiscountPercent: 5, Series: true},
-		{Title: "100 years of solitude", Author: "Gabriel Garcia Marquez", Copies: 3, PriceCents: 3500, DiscountPercent: 0, Series: false},
+		{Title: "Death", Authors: []string{"Richard Beliveau"}, Copies: 9, PriceCents: 2999, DiscountPercent: 10, Series: false},
+		{Title: "Lord of the rings", Authors: []string{"J.R.R Tolkien"}, Copies: 20, PriceCents: 1950, DiscountPercent: 5, Series: true},
+		{Title: "100 years of solitude", Authors: []string{"Gabriel Garcia Marquez"}, Copies: 3, PriceCents: 3500, DiscountPercent: 0, Series: false},
+		{Title: "The Elements of Style", Authors: []string{"Strunk", "&", "White"}, Copies: 4, PriceCents: 4999, DiscountPercent: 5, Series: false},
 	}
 
 	for _, book := range books {
 		bookstore.PrintBook(&sb, book)
 	}
 
-	expectedOutput := "{Title:Death Author:Richard Beliveau Copies:9 PriceCents:2999 DiscountPercent:10 Series:false}\n" +
-		"{Title:Lord of the rings Author:J.R.R Tolkien Copies:20 PriceCents:1950 DiscountPercent:5 Series:true}\n" +
-		"{Title:100 years of solitude Author:Gabriel Garcia Marquez Copies:3 PriceCents:3500 DiscountPercent:0 Series:false}\n"
+	expectedOutput := "{Title:Death Authors:[Richard Beliveau] Copies:9 PriceCents:2999 DiscountPercent:10 Series:false}\n" +
+		"{Title:Lord of the rings Authors:[J.R.R Tolkien] Copies:20 PriceCents:1950 DiscountPercent:5 Series:true}\n" +
+		"{Title:100 years of solitude Authors:[Gabriel Garcia Marquez] Copies:3 PriceCents:3500 DiscountPercent:0 Series:false}\n" +
+		"{Title:The Elements of Style Authors:[Strunk & White] Copies:4 PriceCents:4999 DiscountPercent:5 Series:false}\n"
 
 	if sb.String() != expectedOutput {
 		t.Errorf("Expected output: %q, but got %q", expectedOutput, sb.String())

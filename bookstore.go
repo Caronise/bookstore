@@ -7,7 +7,7 @@ import (
 
 type Book struct {
 	Title           string
-	Author          string
+	Authors         []string
 	Copies          int
 	PriceCents      int
 	DiscountPercent int
