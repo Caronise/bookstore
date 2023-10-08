@@ -17,6 +17,8 @@ type Book struct {
 	Series          bool
 }
 
+type Catalog []Book
+
 type Customer struct {
 	Title   string
 	Name    string
@@ -155,4 +157,9 @@ func (b Book) SalePriceCents() int {
 // MailingLabel returns the address of a customer.
 func (c Customer) MailingLabel() string {
 	return c.Address
+}
+
+// GetAllBooks returns the slice of all books inside the catalog.
+func (c Catalog) GetAllBooks() []Book {
+	return []Book(c)
 }
