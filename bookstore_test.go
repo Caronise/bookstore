@@ -55,7 +55,7 @@ func TestAddBook(t *testing.T) {
 
 	updatedBooks := bookstore.AddBook(books, newBook)
 
-	if _, exists := updatedBooks[newBook.ID]; !exists {
+	if _, ok := updatedBooks[newBook.ID]; !ok {
 		t.Errorf("Failed to add book: %+v to books: %+v", newBook, books)
 	}
 }
