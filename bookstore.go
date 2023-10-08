@@ -2,6 +2,7 @@ package bookstore
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -14,6 +15,12 @@ type Book struct {
 	PriceCents      int
 	DiscountPercent int
 	Series          bool
+}
+
+type Customer struct {
+	Title   string
+	Name    string
+	Address string
 }
 
 // var Books = []Book{
@@ -122,12 +129,30 @@ func GetAllBookDetails() string {
 	books := GetAllBooks()
 	var sb strings.Builder
 
-	for _, book := range books {
-		fmt.Fprint(&sb, GetBookDetails(book.ID))
+	keys := make([]string, 0, len(books))
+	for bk := range books {
+		keys = append(keys, bk)
 	}
+
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		fmt.Fprint(&sb, GetBookDetails(k))
+	}
+
 	return sb.String()
 }
 
 func BuyBook(book Book) bool {
 	return book.Copies <= 0
+}
+
+// SalePriceCents returns the sale price of the book.
+func (b Book) SalePriceCents() int {
+	return b.PriceCents
+}
+
+// MailingLabel returns the address of a customer.
+func (c Customer) MailingLabel() string {
+	return c.Address
 }

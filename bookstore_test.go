@@ -2,7 +2,6 @@ package bookstore_test
 
 import (
 	"bookstore"
-	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -108,9 +107,41 @@ func TestBuyBook(t *testing.T) {
 
 	if purchased {
 		t.Errorf("Could not purchase %s, copies available: %d", book.Title, book.Copies)
-	} else {
-		fmt.Printf("Succesfully purchased %s for %d\n", book.Title, book.PriceCents)
-		// book.Copies -= 1
-		// bookstore.Books["Book1"] = book
+	}
+	// fmt.Printf("Succesfully purchased %s for %d\n", book.Title, book.PriceCents)
+	// book.Copies -= 1
+	// bookstore.Books["Book1"] = book
+
+}
+
+func TestSalePriceCents(t *testing.T) {
+	t.Parallel()
+	b := bookstore.Book{
+		Title:      "A Clockwork Orange Soda",
+		PriceCents: 500,
+	}
+
+	want := 500
+	got := b.SalePriceCents()
+
+	if want != got {
+		t.Errorf("want %d, got %d", want, got)
+	}
+}
+
+func TestMailingLabel(t *testing.T) {
+	t.Parallel()
+
+	c := bookstore.Customer{
+		Title:   "Dr.",
+		Name:    "Doom",
+		Address: "666 End of the Road",
+	}
+
+	want := "666 End of the Road"
+	got := c.MailingLabel()
+
+	if want != got {
+		t.Errorf("want %s, got %s", want, got)
 	}
 }
