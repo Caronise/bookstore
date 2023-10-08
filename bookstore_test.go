@@ -2,6 +2,7 @@ package bookstore_test
 
 import (
 	"bookstore"
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -93,5 +94,23 @@ func TestGetAllBookDetails(t *testing.T) {
 
 	if want != got {
 		t.Errorf("Expected: \n%q, but got: \n%q", want, got)
+	}
+}
+
+func TestBuyBook(t *testing.T) {
+	t.Parallel()
+
+	book := bookstore.Books["Book01"]
+	// Change this to fail the purchase
+	// book.PriceCents = 0
+
+	purchased := bookstore.BuyBook(book)
+
+	if purchased {
+		t.Errorf("Could not purchase %s, copies available: %d", book.Title, book.Copies)
+	} else {
+		fmt.Printf("Succesfully purchased %s for %d\n", book.Title, book.PriceCents)
+		// book.Copies -= 1
+		// bookstore.Books["Book1"] = book
 	}
 }

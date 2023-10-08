@@ -127,3 +127,7 @@ func GetAllBookDetails() string {
 	}
 	return sb.String()
 }
+
+func BuyBook(book Book) bool {
+	return book.Copies <= 0
+}
