@@ -16,8 +16,41 @@ type Book struct {
 	Series          bool
 }
 
-var Books = []Book{
-	{
+// var Books = []Book{
+// 	{
+// 		ID:              "Book01",
+// 		Title:           "Spark Joy",
+// 		Authors:         []string{"Marie Kondo"},
+// 		Description:     "A tiny, cheerful Japanese woman explains tidying.",
+// 		Copies:          66,
+// 		PriceCents:      1199,
+// 		DiscountPercent: 10,
+// 		Series:          false,
+// 	},
+// 	{
+// 		ID:              "Book02",
+// 		Title:           "Death",
+// 		Authors:         []string{"Richard Beliveau"},
+// 		Description:     "A deep dive into the mysteries of life and the inevitable reality of death.",
+// 		Copies:          9,
+// 		PriceCents:      2999,
+// 		DiscountPercent: 10,
+// 		Series:          false,
+// 	},
+// 	{
+// 		ID:              "Book03",
+// 		Title:           "Lord of the rings",
+// 		Authors:         []string{"J.R.R Tolkien"},
+// 		Description:     "An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.",
+// 		Copies:          20,
+// 		PriceCents:      1950,
+// 		DiscountPercent: 5,
+// 		Series:          true,
+// 	},
+// }
+
+var Books = map[string]Book{
+	"Book01": {
 		ID:              "Book01",
 		Title:           "Spark Joy",
 		Authors:         []string{"Marie Kondo"},
@@ -27,7 +60,7 @@ var Books = []Book{
 		DiscountPercent: 10,
 		Series:          false,
 	},
-	{
+	"Book02": {
 		ID:              "Book02",
 		Title:           "Death",
 		Authors:         []string{"Richard Beliveau"},
@@ -37,7 +70,7 @@ var Books = []Book{
 		DiscountPercent: 10,
 		Series:          false,
 	},
-	{
+	"Book03": {
 		ID:              "Book03",
 		Title:           "Lord of the rings",
 		Authors:         []string{"J.R.R Tolkien"},
@@ -63,12 +96,25 @@ func ApplyDiscount(priceCents, discountPercent int) int {
 	return (priceCents * (100 - discountPercent)) / 100
 }
 
-func AddBook(books []Book, newBook Book) []Book {
-	books = append(books, newBook)
+// // AddBook to slice
+// func AddBook(books []Book, newBook Book) []Book {
+// 	books = append(books, newBook)
+// 	return books
+// }
+
+// AddBook to map
+func AddBook(books map[string]Book, newBook Book) map[string]Book {
+	books[newBook.ID] = newBook
 	return books
 }
 
-func GetAllBooks() []Book {
+// // GetAllBooks from slice
+// func GetAllBooks() []Book {
+// 	return Books
+// }
+
+// GetAllBooks from map
+func GetAllBooks() map[string]Book {
 	return Books
 }
 
