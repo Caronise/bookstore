@@ -11,6 +11,7 @@ type Book struct {
 	Title           string
 	Authors         []string
 	Description     string
+	category        string
 	Copies          int
 	PriceCents      int
 	DiscountPercent int
@@ -133,4 +134,12 @@ func (c Catalog) GetUniqueAuthors() []string {
 
 func (b *Book) SetPriceCents(price int) {
 	b.PriceCents = price
+}
+
+func (b *Book) SetCategory(category string) error {
+	if category != "Autobiography" {
+		return fmt.Errorf("unknown category: %q", category)
+	}
+	b.category = category
+	return nil
 }

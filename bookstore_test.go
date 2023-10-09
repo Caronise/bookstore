@@ -5,15 +5,17 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func getSharedCatalogVar() bookstore.Catalog {
 	return bookstore.Catalog{
 		{
-			ID:              "Book01",
-			Title:           "Spark Joy",
-			Authors:         []string{"Marie Kondo"},
-			Description:     "A tiny, cheerful Japanese woman explains tidying.",
+			ID:          "Book01",
+			Title:       "Spark Joy",
+			Authors:     []string{"Marie Kondo"},
+			Description: "A tiny, cheerful Japanese woman explains tidying.",
+			// category:        "Fantasy",
 			Copies:          66,
 			PriceCents:      1199,
 			DiscountPercent: 10,
@@ -87,7 +89,7 @@ func TestAddBook(t *testing.T) {
 	newBook := bookstore.Book{ID: "Book04", Title: "The Elements of Style", Authors: []string{"Strunk", "&", "White"}, Copies: 4, PriceCents: 4999, DiscountPercent: 5, Series: false}
 	c.AddBook(newBook)
 
-	if !cmp.Equal(c[len(c)-1], newBook) {
+	if !cmp.Equal(c[len(c)-1], newBook, cmpopts.IgnoreUnexported(bookstore.Book{})) {
 		t.Errorf("Failed to add book: %+v to catalog: %+v", newBook, c)
 	}
 }
@@ -97,7 +99,7 @@ func TestGetAllBooks(t *testing.T) {
 	c := getSharedCatalogVar()
 	got := c.GetAllBooks()
 
-	if !cmp.Equal(c, got) {
+	if !cmp.Equal(c, got, cmpopts.IgnoreUnexported(bookstore.Book{})) {
 		t.Error(cmp.Diff(c, got))
 	}
 }
@@ -183,7 +185,7 @@ func TestCatalogGetAllBooks(t *testing.T) {
 	c := getSharedCatalogVar()
 	got := c.GetAllBooks()
 
-	if !cmp.Equal(c, got) {
+	if !cmp.Equal(c, got, cmpopts.IgnoreUnexported(bookstore.Book{})) {
 		t.Errorf(cmp.Diff(c, got))
 	}
 }
@@ -208,7 +210,7 @@ func TestGetBookByID(t *testing.T) {
 	want := c[0]
 	got := c.GetBookByID(c[0].ID) // "Book01"
 
-	if !cmp.Equal(want, got) {
+	if !cmp.Equal(want, got, cmpopts.IgnoreUnexported(bookstore.Book{})) {
 		t.Errorf("Wanted %+v, but got %+v", want, got)
 	}
 }
@@ -221,7 +223,7 @@ func TestGetAllTitles(t *testing.T) {
 	want := []string{"Spark Joy", "Death", "Lord of the Rings"}
 	got := c.GetAllTitles()
 
-	if !cmp.Equal(want, got) {
+	if !cmp.Equal(want, got, cmpopts.IgnoreUnexported(bookstore.Book{})) {
 		t.Errorf("Wanted %q, but got %q", want, got)
 	}
 }
@@ -248,7 +250,7 @@ func TestGetUniqueAuthors(t *testing.T) {
 	want := []string{"Marie Kondo", "Richard Beliveau", "J.R.R Tolkien"}
 	got := c.GetUniqueAuthors()
 
-	if !cmp.Equal(want, got) {
+	if !cmp.Equal(want, got, cmpopts.IgnoreUnexported(bookstore.Book{})) {
 		t.Errorf("Wanted: %q, but got %q", want, got)
 	}
 }
@@ -264,5 +266,17 @@ func TestSetPriceCents(t *testing.T) {
 
 	if want != book.PriceCents {
 		t.Errorf("wanted: %d, but got: %d\n", want, book.PriceCents)
+	}
+}
+
+func TestSetCategory(t *testing.T) {
+	t.Parallel()
+
+	c := getSharedCatalogVar()
+	book := c[0]
+	category := "Autobiography"
+	err := book.SetCategory(category)
+	if err != nil {
+		t.Errorf("Failed to set category for book: %s", err.Error())
 	}
 }
