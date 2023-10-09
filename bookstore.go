@@ -14,7 +14,7 @@ type Book struct {
 	category        string
 	Copies          int
 	PriceCents      int
-	DiscountPercent int
+	discountPercent int
 	Series          bool
 }
 
@@ -48,11 +48,6 @@ func (c Catalog) GetBookByID(ID string) Book {
 		}
 	}
 	return Book{}
-}
-
-// EvaluateDiscount returns the price after applying the discount.
-func EvaluateDiscount(priceCents, discountPercent int) int {
-	return (priceCents * (100 - discountPercent)) / 100
 }
 
 // AddBook appends a new book to catalog
@@ -142,4 +137,16 @@ func (b *Book) SetCategory(category string) error {
 	}
 	b.category = category
 	return nil
+}
+
+func (b *Book) SetDiscountPercent(discount int) error {
+	if discount >= 0 && discount <= 100 {
+		b.discountPercent = discount
+		return nil
+	}
+	return fmt.Errorf("unable to apply invalid discount: %d", discount)
+}
+
+func (b *Book) DiscountPercent() int {
+	return b.discountPercent
 }

@@ -16,77 +16,47 @@ func getSharedCatalogVar() bookstore.Catalog {
 			Authors:     []string{"Marie Kondo"},
 			Description: "A tiny, cheerful Japanese woman explains tidying.",
 			// category:        "Fantasy",
-			Copies:          66,
-			PriceCents:      1199,
-			DiscountPercent: 10,
-			Series:          false,
+			Copies:     66,
+			PriceCents: 1199,
+			Series:     false,
 		},
 		{
-			ID:              "Book02",
-			Title:           "Death",
-			Authors:         []string{"Richard Beliveau"},
-			Description:     "A deep dive into the mysteries of life and the inevitable reality of death.",
-			Copies:          9,
-			PriceCents:      2999,
-			DiscountPercent: 10,
-			Series:          false,
+			ID:          "Book02",
+			Title:       "Death",
+			Authors:     []string{"Richard Beliveau"},
+			Description: "A deep dive into the mysteries of life and the inevitable reality of death.",
+			Copies:      9,
+			PriceCents:  2999,
+			Series:      false,
 		},
 		{
-			ID:              "Book03",
-			Title:           "Lord of the Rings",
-			Authors:         []string{"J.R.R Tolkien"},
-			Description:     "An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.",
-			Copies:          20,
-			PriceCents:      1950,
-			DiscountPercent: 5,
-			Series:          true,
+			ID:          "Book03",
+			Title:       "Lord of the Rings",
+			Authors:     []string{"J.R.R Tolkien"},
+			Description: "An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.",
+			Copies:      20,
+			PriceCents:  1950,
+			Series:      true,
 		},
 	}
 }
 
 func TestBook(t *testing.T) {
 	_ = bookstore.Book{
-		ID:              "Book01",
-		Title:           "Spark Joy",
-		Authors:         []string{"Marie Kondo"},
-		Description:     "A tiny, cheerful Japanese woman explains tidying.",
-		Copies:          66,
-		PriceCents:      1199,
-		DiscountPercent: 10,
-		Series:          false,
-	}
-}
-
-func TestApplyDiscount(t *testing.T) {
-	t.Parallel()
-	book := bookstore.Book{
-		ID:              "Book02",
-		Title:           "Death",
-		Authors:         []string{"Richard Beliveau"},
-		Description:     "A deep dive into the mysteries of life and the inevitable reality of death.",
-		Copies:          5,
-		PriceCents:      2999,
-		DiscountPercent: 10,
-		Series:          false,
-	}
-
-	// In this example with the values above it should be 2699
-	expectedPrice := (book.PriceCents * (100 - book.DiscountPercent)) / 100
-	// Apply the discount
-	discountedPrice := bookstore.EvaluateDiscount(book.PriceCents, book.DiscountPercent)
-	// update priceCents and DiscountPercent to reflect applied discount.
-	book.PriceCents = discountedPrice
-	book.DiscountPercent = 0
-
-	if discountedPrice != expectedPrice {
-		t.Errorf("Expected price: %d, but got %d", expectedPrice, discountedPrice)
+		ID:          "Book01",
+		Title:       "Spark Joy",
+		Authors:     []string{"Marie Kondo"},
+		Description: "A tiny, cheerful Japanese woman explains tidying.",
+		Copies:      66,
+		PriceCents:  1199,
+		Series:      false,
 	}
 }
 
 func TestAddBook(t *testing.T) {
 	t.Parallel()
 	c := getSharedCatalogVar()
-	newBook := bookstore.Book{ID: "Book04", Title: "The Elements of Style", Authors: []string{"Strunk", "&", "White"}, Copies: 4, PriceCents: 4999, DiscountPercent: 5, Series: false}
+	newBook := bookstore.Book{ID: "Book04", Title: "The Elements of Style", Authors: []string{"Strunk", "&", "White"}, Copies: 4, PriceCents: 4999, Series: false}
 	c.AddBook(newBook)
 
 	if !cmp.Equal(c[len(c)-1], newBook, cmpopts.IgnoreUnexported(bookstore.Book{})) {
@@ -234,14 +204,13 @@ func TestGetUniqueAuthors(t *testing.T) {
 	c := getSharedCatalogVar()
 
 	newBook := bookstore.Book{
-		ID:              "Book05",
-		Title:           "The Two Towers",
-		Authors:         []string{"J.R.R Tolkien"},
-		Description:     "The second volume of Tolkien's \"The Lord of the Rings\" trilogy. The tale unfolds with growing darkness and challenges.",
-		Copies:          13,
-		PriceCents:      1950,
-		DiscountPercent: 5,
-		Series:          true,
+		ID:          "Book05",
+		Title:       "The Two Towers",
+		Authors:     []string{"J.R.R Tolkien"},
+		Description: "The second volume of Tolkien's \"The Lord of the Rings\" trilogy. The tale unfolds with growing darkness and challenges.",
+		Copies:      13,
+		PriceCents:  1950,
+		Series:      true,
 	}
 
 	c.AddBook(newBook)
@@ -279,4 +248,41 @@ func TestSetCategory(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to set category for book: %s", err.Error())
 	}
+}
+
+func TestSetDiscountPercent(t *testing.T) {
+	t.Parallel()
+
+	c := getSharedCatalogVar()
+	book := c[0]
+
+	type testCase struct {
+		discount, want int
+		errExpected    bool
+	}
+
+	testCases := []testCase{
+		{discount: 50, want: 50, errExpected: false},
+		{discount: 100, want: 100, errExpected: false},
+		{discount: 0, want: 0, errExpected: false},
+		{discount: 101, want: 0, errExpected: true},
+		{discount: -1, want: 0, errExpected: true},
+	}
+
+	for _, tc := range testCases {
+		book.SetDiscountPercent(0)
+
+		err := book.SetDiscountPercent(tc.discount)
+		if tc.errExpected && err == nil {
+			t.Errorf("expected an error for discount %d but got none", tc.discount)
+		} else if !tc.errExpected && err != nil {
+			t.Errorf("did not expect an error for discount %d but got: %s", tc.discount, err)
+		}
+
+		got := book.DiscountPercent()
+		if tc.want != got {
+			t.Errorf("for discount: %d, wanted: %d, but got: %d\n", tc.discount, tc.want, got)
+		}
+	}
+
 }
