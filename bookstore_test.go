@@ -7,6 +7,41 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func getSharedCatalogVar() bookstore.Catalog {
+	return bookstore.Catalog{
+		{
+			ID:              "Book01",
+			Title:           "Spark Joy",
+			Authors:         []string{"Marie Kondo"},
+			Description:     "A tiny, cheerful Japanese woman explains tidying.",
+			Copies:          66,
+			PriceCents:      1199,
+			DiscountPercent: 10,
+			Series:          false,
+		},
+		{
+			ID:              "Book02",
+			Title:           "Death",
+			Authors:         []string{"Richard Beliveau"},
+			Description:     "A deep dive into the mysteries of life and the inevitable reality of death.",
+			Copies:          9,
+			PriceCents:      2999,
+			DiscountPercent: 10,
+			Series:          false,
+		},
+		{
+			ID:              "Book03",
+			Title:           "Lord of the Rings",
+			Authors:         []string{"J.R.R Tolkien"},
+			Description:     "An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.",
+			Copies:          20,
+			PriceCents:      1950,
+			DiscountPercent: 5,
+			Series:          true,
+		},
+	}
+}
+
 func TestBook(t *testing.T) {
 	_ = bookstore.Book{
 		ID:              "Book01",
@@ -36,7 +71,7 @@ func TestApplyDiscount(t *testing.T) {
 	// In this example with the values above it should be 2699
 	expectedPrice := (book.PriceCents * (100 - book.DiscountPercent)) / 100
 	// Apply the discount
-	discountedPrice := bookstore.ApplyDiscount(book.PriceCents, book.DiscountPercent)
+	discountedPrice := bookstore.EvaluateDiscount(book.PriceCents, book.DiscountPercent)
 	// update priceCents and DiscountPercent to reflect applied discount.
 	book.PriceCents = discountedPrice
 	book.DiscountPercent = 0
@@ -48,34 +83,30 @@ func TestApplyDiscount(t *testing.T) {
 
 func TestAddBook(t *testing.T) {
 	t.Parallel()
-
-	books := bookstore.Books
-
+	c := getSharedCatalogVar()
 	newBook := bookstore.Book{ID: "Book04", Title: "The Elements of Style", Authors: []string{"Strunk", "&", "White"}, Copies: 4, PriceCents: 4999, DiscountPercent: 5, Series: false}
+	updatedBooks := c.AddBook(newBook)
 
-	updatedBooks := bookstore.AddBook(books, newBook)
-
-	if _, ok := updatedBooks[newBook.ID]; !ok {
-		t.Errorf("Failed to add book: %+v to books: %+v", newBook, books)
+	if !cmp.Equal(updatedBooks[len(updatedBooks)-1], newBook) {
+		t.Errorf("Failed to add book: %+v to catalog: %+v", newBook, c)
 	}
 }
 
 func TestGetAllBooks(t *testing.T) {
-	want := bookstore.Books
+	t.Parallel()
+	c := getSharedCatalogVar()
+	got := c.GetAllBooks()
 
-	got := bookstore.GetAllBooks()
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
+	if !cmp.Equal(c, got) {
+		t.Error(cmp.Diff(c, got))
 	}
 }
 
 func TestGetBookDetails(t *testing.T) {
 	t.Parallel()
-
+	c := getSharedCatalogVar()
 	want := "Death by Richard Beliveau - A deep dive into the mysteries of life and the inevitable reality of death.\n"
-
-	got := bookstore.GetBookDetails("Book02")
+	got := c.GetBookDetails("Book02")
 
 	if got != want {
 		t.Errorf("Expected: \n%q, but got: \n%q", want, got)
@@ -84,12 +115,11 @@ func TestGetBookDetails(t *testing.T) {
 
 func TestGetAllBookDetails(t *testing.T) {
 	t.Parallel()
-
+	c := getSharedCatalogVar()
 	want := "Spark Joy by Marie Kondo - A tiny, cheerful Japanese woman explains tidying.\n" +
 		"Death by Richard Beliveau - A deep dive into the mysteries of life and the inevitable reality of death.\n" +
-		"Lord of the rings by J.R.R Tolkien - An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.\n"
-
-	got := bookstore.GetAllBookDetails()
+		"Lord of the Rings by J.R.R Tolkien - An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.\n"
+	got := c.GetAllBookDetails()
 
 	if want != got {
 		t.Errorf("Expected: \n%q, but got: \n%q", want, got)
@@ -99,7 +129,9 @@ func TestGetAllBookDetails(t *testing.T) {
 func TestBuyBook(t *testing.T) {
 	t.Parallel()
 
-	book := bookstore.Books["Book01"]
+	c := getSharedCatalogVar()
+	want := "Book01"
+	book := c.GetBookByID(want)
 	// Change this to fail the purchase
 	// book.PriceCents = 0
 
@@ -111,7 +143,6 @@ func TestBuyBook(t *testing.T) {
 	// fmt.Printf("Succesfully purchased %s for %d\n", book.Title, book.PriceCents)
 	// book.Copies -= 1
 	// bookstore.Books["Book1"] = book
-
 }
 
 func TestSalePriceCents(t *testing.T) {
@@ -147,87 +178,76 @@ func TestMailingLabel(t *testing.T) {
 }
 
 func TestCatalogGetAllBooks(t *testing.T) {
-	want := []bookstore.Book{
-		{
-			ID:              "Book01",
-			Title:           "Spark Joy",
-			Authors:         []string{"Marie Kondo"},
-			Description:     "A tiny, cheerful Japanese woman explains tidying.",
-			Copies:          66,
-			PriceCents:      1199,
-			DiscountPercent: 10,
-			Series:          false,
-		},
-		{
-			ID:              "Book02",
-			Title:           "Death",
-			Authors:         []string{"Richard Beliveau"},
-			Description:     "A deep dive into the mysteries of life and the inevitable reality of death.",
-			Copies:          9,
-			PriceCents:      2999,
-			DiscountPercent: 10,
-			Series:          false,
-		},
-		{
-			ID:              "Book03",
-			Title:           "Lord of the rings",
-			Authors:         []string{"J.R.R Tolkien"},
-			Description:     "An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.",
-			Copies:          20,
-			PriceCents:      1950,
-			DiscountPercent: 5,
-			Series:          true,
-		},
-	}
+	t.Parallel()
 
-	c := bookstore.Catalog(want)
+	c := getSharedCatalogVar()
 	got := c.GetAllBooks()
 
-	if !cmp.Equal(want, got) {
-		t.Errorf(cmp.Diff(want, got))
+	if !cmp.Equal(c, got) {
+		t.Errorf(cmp.Diff(c, got))
 	}
 }
 
 func TestGetCatalogSize(t *testing.T) {
 	t.Parallel()
 
-	c := bookstore.Catalog([]bookstore.Book{
-		{
-			ID:              "Book01",
-			Title:           "Spark Joy",
-			Authors:         []string{"Marie Kondo"},
-			Description:     "A tiny, cheerful Japanese woman explains tidying.",
-			Copies:          66,
-			PriceCents:      1199,
-			DiscountPercent: 10,
-			Series:          false,
-		},
-		{
-			ID:              "Book02",
-			Title:           "Death",
-			Authors:         []string{"Richard Beliveau"},
-			Description:     "A deep dive into the mysteries of life and the inevitable reality of death.",
-			Copies:          9,
-			PriceCents:      2999,
-			DiscountPercent: 10,
-			Series:          false,
-		},
-		{
-			ID:              "Book03",
-			Title:           "Lord of the rings",
-			Authors:         []string{"J.R.R Tolkien"},
-			Description:     "An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.",
-			Copies:          20,
-			PriceCents:      1950,
-			DiscountPercent: 5,
-			Series:          true,
-		},
-	})
-
+	c := getSharedCatalogVar()
 	want := 3
 	got := c.GetCatalogSize()
 
 	if want != got {
 		t.Errorf("Wanted: %d, got %d", want, got)
+	}
+}
+
+func TestGetBookByID(t *testing.T) {
+	t.Parallel()
+
+	c := getSharedCatalogVar()
+
+	want := c[0]
+	got := c.GetBookByID(c[0].ID) // "Book01"
+
+	if !cmp.Equal(want, got) {
+		t.Errorf("Wanted %+v, but got %+v", want, got)
+	}
+}
+
+func TestGetAllTitles(t *testing.T) {
+	t.Parallel()
+
+	c := getSharedCatalogVar()
+
+	want := []string{"Spark Joy", "Death", "Lord of the Rings"}
+	got := c.GetAllTitles()
+
+	if !cmp.Equal(want, got) {
+		t.Errorf("Wanted %q, but got %q", want, got)
+	}
+}
+
+func TestGetUniqueAuthors(t *testing.T) {
+	t.Parallel()
+
+	c := getSharedCatalogVar()
+
+	newBook := bookstore.Book{
+		ID:              "Book05",
+		Title:           "The Two Towers",
+		Authors:         []string{"J.R.R Tolkien"},
+		Description:     "The second volume of Tolkien's \"The Lord of the Rings\" trilogy. The tale unfolds with growing darkness and challenges.",
+		Copies:          13,
+		PriceCents:      1950,
+		DiscountPercent: 5,
+		Series:          true,
+	}
+
+	updatedCatalog := c.AddBook(newBook)
+
+	want := []string{"Marie Kondo", "Richard Beliveau", "J.R.R Tolkien"} // Should only appear once, despite there being two entries.
+	got := updatedCatalog.GetUniqueAuthors()
+
+	if !cmp.Equal(want, got) {
+		t.Errorf("Wanted: %q, but got %q", want, got)
 	}
 }

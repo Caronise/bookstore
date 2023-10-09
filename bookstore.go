@@ -2,10 +2,10 @@ package bookstore
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 )
 
+// Book contains the information for each book.
 type Book struct {
 	ID              string
 	Title           string
@@ -17,82 +17,20 @@ type Book struct {
 	Series          bool
 }
 
+// Catalog is a slice of books.
 type Catalog []Book
 
+// Customer contains the information for each customer.
 type Customer struct {
 	Title   string
 	Name    string
 	Address string
 }
 
-// var Books = []Book{
-// 	{
-// 		ID:              "Book01",
-// 		Title:           "Spark Joy",
-// 		Authors:         []string{"Marie Kondo"},
-// 		Description:     "A tiny, cheerful Japanese woman explains tidying.",
-// 		Copies:          66,
-// 		PriceCents:      1199,
-// 		DiscountPercent: 10,
-// 		Series:          false,
-// 	},
-// 	{
-// 		ID:              "Book02",
-// 		Title:           "Death",
-// 		Authors:         []string{"Richard Beliveau"},
-// 		Description:     "A deep dive into the mysteries of life and the inevitable reality of death.",
-// 		Copies:          9,
-// 		PriceCents:      2999,
-// 		DiscountPercent: 10,
-// 		Series:          false,
-// 	},
-// 	{
-// 		ID:              "Book03",
-// 		Title:           "Lord of the rings",
-// 		Authors:         []string{"J.R.R Tolkien"},
-// 		Description:     "An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.",
-// 		Copies:          20,
-// 		PriceCents:      1950,
-// 		DiscountPercent: 5,
-// 		Series:          true,
-// 	},
-// }
-
-var Books = map[string]Book{
-	"Book01": {
-		ID:              "Book01",
-		Title:           "Spark Joy",
-		Authors:         []string{"Marie Kondo"},
-		Description:     "A tiny, cheerful Japanese woman explains tidying.",
-		Copies:          66,
-		PriceCents:      1199,
-		DiscountPercent: 10,
-		Series:          false,
-	},
-	"Book02": {
-		ID:              "Book02",
-		Title:           "Death",
-		Authors:         []string{"Richard Beliveau"},
-		Description:     "A deep dive into the mysteries of life and the inevitable reality of death.",
-		Copies:          9,
-		PriceCents:      2999,
-		DiscountPercent: 10,
-		Series:          false,
-	},
-	"Book03": {
-		ID:              "Book03",
-		Title:           "Lord of the rings",
-		Authors:         []string{"J.R.R Tolkien"},
-		Description:     "An epic fantasy novel that chronicles the adventures of hobbits, elves, and men against the dark lord Sauron.",
-		Copies:          20,
-		PriceCents:      1950,
-		DiscountPercent: 5,
-		Series:          true,
-	},
-}
-
-func GetBookDetails(ID string) string {
-	for _, book := range Books {
+// GetBookDetails returns a string with details on a book in the format
+// "title by author - description"
+func (c Catalog) GetBookDetails(ID string) string {
+	for _, book := range c {
 		if book.ID == ID {
 			authors := strings.Join(book.Authors, " ")
 			return fmt.Sprintf("%s by %s - %s\n", book.Title, authors, book.Description)
@@ -101,50 +39,41 @@ func GetBookDetails(ID string) string {
 	return ""
 }
 
-func ApplyDiscount(priceCents, discountPercent int) int {
+// GetBookByID returns the book based on book ID.
+func (c Catalog) GetBookByID(ID string) Book {
+	for _, b := range c {
+		if b.ID == ID {
+			return b
+		}
+	}
+	return Book{}
+}
+
+// EvaluateDiscount returns the price after applying the discount.
+func EvaluateDiscount(priceCents, discountPercent int) int {
 	return (priceCents * (100 - discountPercent)) / 100
 }
 
-// // AddBook to slice
-// func AddBook(books []Book, newBook Book) []Book {
-// 	books = append(books, newBook)
-// 	return books
-// }
-
-// AddBook to map
-func AddBook(books map[string]Book, newBook Book) map[string]Book {
-	books[newBook.ID] = newBook
-	return books
+// AddBook appends a new book to catalog
+func (c Catalog) AddBook(newBook Book) Catalog {
+	c = append(c, newBook)
+	return c
 }
 
-// // GetAllBooks from slice
-// func GetAllBooks() []Book {
-// 	return Books
-// }
-
-// GetAllBooks from map
-func GetAllBooks() map[string]Book {
-	return Books
-}
-
-func GetAllBookDetails() string {
-	books := GetAllBooks()
+// GetAllBookDetails returns a string that concatenates GetBookDetails of
+// every book in the catalog.
+func (c Catalog) GetAllBookDetails() string {
+	catalog := c.GetAllBooks()
 	var sb strings.Builder
 
-	keys := make([]string, 0, len(books))
-	for bk := range books {
-		keys = append(keys, bk)
-	}
-
-	sort.Strings(keys)
-
-	for _, k := range keys {
-		fmt.Fprint(&sb, GetBookDetails(k))
+	for _, b := range catalog {
+		fmt.Fprint(&sb, c.GetBookDetails(b.ID))
 	}
 
 	return sb.String()
 }
 
+// BuyBook returns true if book.Copies is > 0
 func BuyBook(book Book) bool {
 	return book.Copies <= 0
 }
@@ -160,11 +89,45 @@ func (c Customer) MailingLabel() string {
 }
 
 // GetAllBooks returns the slice of all books inside the catalog.
-func (c Catalog) GetAllBooks() []Book {
+func (c Catalog) GetAllBooks() Catalog {
 	return []Book(c)
 }
 
 // GetCatalogSize returns the size of the catalog.
 func (c Catalog) GetCatalogSize() int {
 	return len(c)
+}
+
+// GetAllTitles returns a slice of all the book titles inside the catalog.
+func (c Catalog) GetAllTitles() []string {
+	titles := make([]string, 0, len(c))
+	for _, b := range c {
+		titles = append(titles, b.Title)
+	}
+	return titles
+}
+
+func contains(s []string, str string) bool {
+	for _, val := range s {
+		if val == str {
+			return true
+		}
+	}
+	return false
+}
+
+func (c Catalog) GetUniqueAuthors() []string {
+	authors := make([]string, 0)
+	allAuthors := make([]string, 0, len(c))
+	for _, b := range c {
+		allAuthors = append(allAuthors, b.Authors...)
+	}
+
+	for _, a := range allAuthors {
+		if !contains(authors, a) {
+			authors = append(authors, a)
+		}
+	}
+
+	return authors
 }
