@@ -55,9 +55,8 @@ func EvaluateDiscount(priceCents, discountPercent int) int {
 }
 
 // AddBook appends a new book to catalog
-func (c Catalog) AddBook(newBook Book) Catalog {
-	c = append(c, newBook)
-	return c
+func (c *Catalog) AddBook(newBook Book) {
+	*c = append(*c, newBook)
 }
 
 // GetAllBookDetails returns a string that concatenates GetBookDetails of
@@ -130,4 +129,8 @@ func (c Catalog) GetUniqueAuthors() []string {
 	}
 
 	return authors
+}
+
+func (b *Book) SetPriceCents(price int) {
+	b.PriceCents = price
 }

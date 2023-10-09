@@ -85,9 +85,9 @@ func TestAddBook(t *testing.T) {
 	t.Parallel()
 	c := getSharedCatalogVar()
 	newBook := bookstore.Book{ID: "Book04", Title: "The Elements of Style", Authors: []string{"Strunk", "&", "White"}, Copies: 4, PriceCents: 4999, DiscountPercent: 5, Series: false}
-	updatedBooks := c.AddBook(newBook)
+	c.AddBook(newBook)
 
-	if !cmp.Equal(updatedBooks[len(updatedBooks)-1], newBook) {
+	if !cmp.Equal(c[len(c)-1], newBook) {
 		t.Errorf("Failed to add book: %+v to catalog: %+v", newBook, c)
 	}
 }
@@ -242,12 +242,27 @@ func TestGetUniqueAuthors(t *testing.T) {
 		Series:          true,
 	}
 
-	updatedCatalog := c.AddBook(newBook)
+	c.AddBook(newBook)
 
-	want := []string{"Marie Kondo", "Richard Beliveau", "J.R.R Tolkien"} // Should only appear once, despite there being two entries.
-	got := updatedCatalog.GetUniqueAuthors()
+	// J.R.R Tolkien should only appear once, despite being twice in the catalog.
+	want := []string{"Marie Kondo", "Richard Beliveau", "J.R.R Tolkien"}
+	got := c.GetUniqueAuthors()
 
 	if !cmp.Equal(want, got) {
 		t.Errorf("Wanted: %q, but got %q", want, got)
+	}
+}
+
+func TestSetPriceCents(t *testing.T) {
+	t.Parallel()
+
+	c := getSharedCatalogVar()
+	book := c[0]
+
+	want := 999
+	book.SetPriceCents(want)
+
+	if want != book.PriceCents {
+		t.Errorf("wanted: %d, but got: %d\n", want, book.PriceCents)
 	}
 }
